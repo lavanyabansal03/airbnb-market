@@ -1,0 +1,30 @@
+# Trained model files (can be regenerated with train_model.py)
+airbnb-price-project/models/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data exploration notebooks (optional, remove if you want to track these)
+# EDA/
+
+# Jupyter
+.ipynb_checkpoints/

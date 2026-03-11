@@ -1,1 +1,6 @@
+streamlit
+pandas
+numpy
+scikit-learn
+plotly  # optional, remove if you don't want interactive charts
 
