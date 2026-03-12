@@ -28,3 +28,6 @@ Thumbs.db
 
 # Jupyter
 .ipynb_checkpoints/
+airbnb-price-project/models/airbnb_price_model.pkl
+*.pkl
+airbnb-price-project/models/model_columns.pkl
