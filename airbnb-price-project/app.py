@@ -51,46 +51,75 @@ st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Log
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["📈 Market Overview", "🔍 Data Explorer", "💰 Price Predictor"])
 
-# --- PAGE 1: OVERVIEW ---
+# --- PAGE 1: MARKET OVERVIEW ---
 if page == "📈 Market Overview":
-    st.title("🏠 Airbnb Market Insights")
+    st.title("🏠 Airbnb Market Insights Overview")
+    st.markdown("A comprehensive look at pricing and inventory across the market.")
     st.markdown("---")
-    
+
     if not data.empty:
         # Top Row Metrics
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Total Listings", f"{len(data):,}")
-        col2.metric("Avg. Nightly Price", f"${data['price'].mean():.2f}")
-        col3.metric("Cities Covered", data['city'].nunique())
-        col4.metric("Avg. Rating", "4.8★") # Example static metric
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Total Listings", f"{len(data):,}")
+        m2.metric("Avg. Nightly Price", f"${data['price'].mean():.2f}")
+        m3.metric("Cities Covered", data['city'].nunique())
+        m4.metric("Avg. Bedrooms", f"{data['bedrooms'].mean():.1f}")
 
-        st.write("##") # Spacing
+        st.write("##")
 
         if _USE_PLOTLY:
-            c1, c2 = st.columns(2)
+            # --- ROW 1 ---
+            r1c1, r1c2, r1c3 = st.columns(3)
             
-            with c1:
-                fig_hist = px.histogram(
-                    data, x="price", nbins=50, 
-                    title="Price Distribution",
-                    color_discrete_sequence=['#FF5A5F'], # Airbnb Red
-                    template="plotly_white"
-                )
-                st.plotly_chart(fig_hist, use_container_width=True)
+            with r1c1:
+                # 1. Price Distribution by City
+                fig1 = px.box(data, x="city", y="price", color="city",
+                             title="Price by City", template="plotly_white",
+                             color_discrete_sequence=px.colors.qualitative.Prism)
+                st.plotly_chart(fig1, use_container_width=True)
+            
+            with r1c2:
+                # 2. Avg Price by Room Type
+                avg_rt = data.groupby('room_type')['price'].mean().reset_index()
+                fig2 = px.bar(avg_rt, x='room_type', y='price', color='room_type',
+                             title="Avg Price: Room Type", template="plotly_white", text_auto='.0f')
+                st.plotly_chart(fig2, use_container_width=True)
 
-            with c2:
-                counts = data['city'].value_counts().reset_index()
-                counts.columns = ['city', 'count']
-                fig_city = px.pie(
-                    counts, values='count', names='city', 
-                    title='Market Share by City',
-                    hole=0.4,
-                    template="plotly_white"
-                )
-                st.plotly_chart(fig_city, use_container_width=True)
+            with r1c3:
+                # 3. Price Density
+                fig3 = px.histogram(data, x="price", nbins=30, title="Price Density",
+                                   color_discrete_sequence=['#FF5A5F'], template="plotly_white")
+                st.plotly_chart(fig3, use_container_width=True)
+
+            # --- ROW 2 ---
+            r2c2, r2c3 = st.columns(2)
+
+            with r2c2:
+                # 5. Inventory Share (Donut)
+                counts = data['room_type'].value_counts().reset_index()
+                fig5 = px.pie(counts, values='count', names='room_type', hole=0.5,
+                             title="Inventory Share", template="plotly_white",
+                             color_discrete_sequence=px.colors.sequential.RdBu)
+                st.plotly_chart(fig5, use_container_width=True)
+
+            with r2c3:
+                # 6. Avg Price by Accommodates
+                avg_acc = data.groupby('accommodates')['price'].mean().reset_index()
+                fig6 = px.line(avg_acc, x='accommodates', y='price', markers=True,
+                              title="Price by Capacity", template="plotly_white",
+                              color_discrete_sequence=['#FF5A5F'])
+                st.plotly_chart(fig6, use_container_width=True)
+
+            # # Correlation Heatmap remains full-width below the grid
+            # st.write("##")
+            # st.subheader("🔗 Feature Correlation Matrix")
+            # corr = data.select_dtypes(include=[np.number]).corr()
+            # fig_heatmap = px.imshow(corr, text_auto=".2f", aspect="auto",
+            #                        color_continuous_scale='RdBu_r', template="plotly_white")
+            # st.plotly_chart(fig_heatmap, use_container_width=True)
+
     else:
-        st.error("Data file not found. Please check your data directory.")
-
+        st.error("Data missing. Please check your file paths.")
 # --- PAGE 2: DATA EXPLORER ---
 elif page == "🔍 Data Explorer":
     st.title("🔍 Raw Data Explorer")
